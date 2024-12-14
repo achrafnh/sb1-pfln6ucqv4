@@ -1,0 +1,80 @@
+paths:
+  /api/consultations/request:
+    post:
+      tags:
+        - Consultations
+      summary: Request a consultation with a lawyer
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - lawyerId
+                - description
+                - preferredDates
+                - preferredContactMethod
+              properties:
+                lawyerId:
+                  type: integer
+                description:
+                  type: string
+                  minLength: 10
+                preferredDates:
+                  type: array
+                  items:
+                    type: string
+                    format: date-time
+                preferredContactMethod:
+                  type: string
+                  enum: [email, phone, video]
+      responses:
+        201:
+          description: Consultation request created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  consultationId:
+                    type: integer
+        400:
+          $ref: '#/components/responses/ValidationError'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+
+  /api/consultations/{consultationId}/status:
+    patch:
+      tags:
+        - Consultations
+      summary: Update consultation status
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: path
+          name: consultationId
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - status
+              properties:
+                status:
+                  type: string
+                  enum: [pending, scheduled, completed, cancelled]
+      responses:
+        200:
+          description: Status updated successfully
+        403:
+          $ref: '#/components/responses/Forbidden'
+        404:
+          $ref: '#/components/responses/NotFound'
